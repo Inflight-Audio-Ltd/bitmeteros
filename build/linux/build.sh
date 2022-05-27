@@ -8,7 +8,9 @@ export VERSION=0.7.6
 WORK_DIR=./work
 WEB_DIR=../../webserver/web
 DB_FILE=../bitmeter.db
-if [ $(arch) = "x86_64" ]; then
+if [ $(arch) = "aarch64" ]; then
+    IS_64=2
+elif [ $(arch) = "x86_64" ]; then
 	IS_64=1
 else 
 	IS_64=0
@@ -44,7 +46,9 @@ cp $WEB_DIR/m/css/*.css      ./debian/var/www/bitmeter/m/css/
 
 cp $DB_FILE ./debian/var/lib/bitmeter/bitmeter.db.new
 
-if [ $IS_64 = 1 ]; then
+if [ $IS_64 = 2 ]; then
+    cp ./control_arm64 ./debian/DEBIAN/control
+elif [ $IS_64 = 1 ]; then
 	cp ./control_64 ./debian/DEBIAN/control
 else
 	cp ./control_32 ./debian/DEBIAN/control
@@ -59,7 +63,9 @@ tar -cpf - --exclude=CVS --exclude=.cvsignore debian| sh -c "cd $WORK_DIR; tar -
 
 dpkg-deb --build $WORK_DIR/debian
 
-if [ $IS_64 = 1 ]; then
+if [ $IS_64 = 2 ]; then
+    mv $WORK_DIR/debian.deb bitmeteros_$VERSION-arm64.deb
+elif [ $IS_64 = 1 ]; then
 	mv $WORK_DIR/debian.deb bitmeteros_$VERSION-amd64.deb
 else
 	mv $WORK_DIR/debian.deb bitmeteros_$VERSION-i386.deb
